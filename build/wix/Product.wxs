@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="mihash"
+           Manufacturer="Equipo"
+           Version="1.0.0"
+           Language="1033"
+           UpgradeCode="PUT-GUID-HERE">
+
+    <Package InstallerVersion="500"
+             Compressed="yes"
+             InstallScope="perMachine" />
+
+    <MediaTemplate />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="mihash" />
+      </Directory>
+    </Directory>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="AppExe" Guid="*">
+        <File Source="dist\mihash.exe" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="MainFeature" Title="mihash" Level="1">
+      <ComponentRef Id="AppExe" />
+    </Feature>
+  </Product>
+</Wix>

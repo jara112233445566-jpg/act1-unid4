@@ -1,0 +1,59 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Ejecutar tests
+        run: pytest -q
+
+      - name: Construir ejecutable
+        run: pyinstaller --onefile src/mihash/__main__.py --name mihash
+
+      - name: Preparar artefactos
+        run: |
+          mkdir dist_out
+          copy dist\mihash.exe dist_out\mihash.exe
+          certutil -hashfile dist_out\mihash.exe SHA256 > dist_out\mihash.exe.sha256
+
+      - name: Subir artefactos
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: dist_out
+
+  release:
+    needs: build-windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Descargar artefactos
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: artifacts
+
+      - name: Crear Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
